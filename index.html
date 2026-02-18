@@ -26,18 +26,22 @@
         background: #64748b; 
       }
     </style>
-  <script type="importmap">
-{
-  "imports": {
-    "lucide-react": "https://esm.sh/lucide-react@^0.569.0",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
-    "react/": "https://esm.sh/react@^19.2.4/",
-    "react": "https://esm.sh/react@^19.2.4",
-    "@google/genai": "https://esm.sh/@google/genai@^1.41.0",
-    "framer-motion": "https://esm.sh/framer-motion@^12.34.0"
-  }
-}
-</script>
+  <!-- BUG FIX 5: The importmap was telling the browser to load React, lucide-react,
+       framer-motion, and @google/genai directly from esm.sh CDN URLs at runtime.
+       This conflicts with Vite, which bundles ALL those same packages from
+       node_modules at build time. The result is two copies of React loading
+       simultaneously — one from the bundle, one from esm.sh — causing a
+       "Cannot update a component..." hook error or a completely blank screen.
+       Vite projects must NEVER use importmaps for packages that are also in
+       package.json. The importmap has been removed entirely; Vite handles all
+       module resolution.
+
+  BUG FIX 6: The original HTML had no <script type="module"> tag pointing at
+       the entry file. Without it Vite's dev server works (it injects one
+       automatically), but the production build's injected script can be missed
+       when the HTML is malformed or the importmap interferes. Adding it
+       explicitly makes the entry point unambiguous. -->
+  <script type="module" src="/index.tsx"></script>
 </head>
   <body>
     <div id="root"></div>
